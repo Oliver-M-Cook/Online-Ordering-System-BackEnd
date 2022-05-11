@@ -1,6 +1,7 @@
 const auth = require('../scripts/authenticator');
 const orders = require('../controllers/order.controllers');
 
+//Creates the routes that can be used to access the API
 module.exports = function (app) {
 	app
 		.route('/restaurant/:restID/order')

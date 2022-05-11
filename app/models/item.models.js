@@ -1,7 +1,9 @@
 const db = require('../../config/db');
 const restaurants = require('../models/restaurant.models');
 
+// Adds an item to the database using the given information
 const addItem = (itemData, authToken, done) => {
+	// Checks if the user is the manager
 	restaurants.checkManager(
 		itemData.restaurantID,
 		authToken,
@@ -11,6 +13,7 @@ const addItem = (itemData, authToken, done) => {
 			} else if (!manager) {
 				return done('Not manager of restaurant');
 			} else {
+				// Formats the values ready to be inserted
 				const values = [
 					[
 						itemData.itemName,
@@ -21,6 +24,7 @@ const addItem = (itemData, authToken, done) => {
 					],
 				];
 
+				// Query is setup here because it is large
 				let query = 'INSERT INTO items ';
 				query += '(itemName, price, calories, category, restaurantID) ';
 				query += 'VALUES (?) ';
@@ -37,6 +41,7 @@ const addItem = (itemData, authToken, done) => {
 	);
 };
 
+// Gets Items using the restaurant ID that is passed through
 const getItemsUsingRestID = (restaurantID, done) => {
 	const value = [restaurantID];
 
@@ -53,6 +58,7 @@ const getItemsUsingRestID = (restaurantID, done) => {
 	);
 };
 
+// Gets a singular item using the restaurant ID and itemID
 const getOneItem = (restaurantID, itemID, done) => {
 	const values = [restaurantID, itemID];
 
@@ -70,6 +76,7 @@ const getOneItem = (restaurantID, itemID, done) => {
 	});
 };
 
+// Updates an already existing item with new data
 const updateItem = (itemData, authToken, done) => {
 	restaurants.checkManager(
 		itemData.restaurantID,
@@ -103,7 +110,9 @@ const updateItem = (itemData, authToken, done) => {
 	);
 };
 
+// Deletes item from database given restaurantID and itemID
 const deleteItem = (itemID, restaurantID, authToken, done) => {
+	// Checks the manager because the manager should be the only one to remove items
 	restaurants.checkManager(restaurantID, authToken, function (error, manager) {
 		if (error) {
 			return done(error);
@@ -125,6 +134,7 @@ const deleteItem = (itemID, restaurantID, authToken, done) => {
 	});
 };
 
+// Exports the functions so they can be called in other files
 module.exports = {
 	addItem: addItem,
 	getItemsUsingRestID: getItemsUsingRestID,

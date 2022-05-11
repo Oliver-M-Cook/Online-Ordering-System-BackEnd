@@ -1,13 +1,14 @@
 const db = require('../../config/db');
 const crypto = require('crypto');
-const { get } = require('express/lib/response');
 
+// Hashes password using crypto library
 const hashPassword = function (password) {
 	const hash = crypto.createHash('md5');
 	hash.update(password);
 	return hash.digest('hex');
 };
 
+// Gets the ID from the authToken linked to a user
 const getIdFromToken = function (authToken, done) {
 	if (!authToken) {
 		return done(true, null);
@@ -26,6 +27,7 @@ const getIdFromToken = function (authToken, done) {
 	}
 };
 
+// Gets the role from the authToken
 const getRoleFromToken = function (authToken, done) {
 	let query = 'SELECT roleID, restaurantID FROM users ';
 	query += 'INNER JOIN roleUserLink rul ON users.userID = rul.userID ';
@@ -40,11 +42,14 @@ const getRoleFromToken = function (authToken, done) {
 	});
 };
 
+// Adds a new user to the database
 const addUser = function (user, done) {
+	// Hashes the password passed to the function
 	const hash = hashPassword(user.password);
 
 	const values = [[user.username, user.firstName, user.lastName, hash]];
 
+	// Checks if the username exists already
 	checkUsername(user.username, function (error, exists) {
 		if (error || exists) {
 			return done('Username already exists');
@@ -56,7 +61,6 @@ const addUser = function (user, done) {
 					if (error) {
 						return done(error);
 					} else {
-						console.log(results.insertId);
 						return done(error, results.insertId);
 					}
 				}
@@ -65,6 +69,7 @@ const addUser = function (user, done) {
 	});
 };
 
+// Adds a user and links that user to a role in the database
 const linkRole = function (user, done) {
 	addUser(user, function (error, userID) {
 		if (error) {
@@ -86,21 +91,23 @@ const linkRole = function (user, done) {
 	});
 };
 
-const setAuthToken = function (id, done) {
+// Updates the authToken with a new authToken
+const setAuthToken = function (userID, done) {
 	const token = crypto.randomBytes(16).toString('hex');
 	db.getPool().query(
 		'UPDATE users SET authToken = ? WHERE userID = ?',
-		[token, id],
+		[token, userID],
 		function (error) {
 			return done(error, token);
 		}
 	);
 };
 
-const getAuthToken = function (id, done) {
+// Gets the authToken from a userID
+const getAuthToken = function (userID, done) {
 	db.getPool().query(
 		'SELECT authToken FROM users WHERE userID = ?',
-		[id],
+		[userID],
 		function (error, results) {
 			if (results.length === 1 && results[0].authToken) {
 				return done(null, results[0].authToken);
@@ -111,16 +118,18 @@ const getAuthToken = function (id, done) {
 	);
 };
 
-const removeAuthToken = function (id, done) {
+// Removes the token linked to a user
+const removeAuthToken = function (userID, done) {
 	db.getPool().query(
 		'UPDATE users SET authToken = null WHERE userID = ?',
-		[id],
+		[userID],
 		function (error) {
 			return done(error);
 		}
 	);
 };
 
+// Checks login details that passed to the function
 const checkLogin = function (username, password, done) {
 	db.getPool().query(
 		'SELECT userID, password FROM users WHERE username = ?',
@@ -139,6 +148,7 @@ const checkLogin = function (username, password, done) {
 	);
 };
 
+// Removes all the staff of a restaurant
 const removeUsersUsingRestID = function (restaurantID, done) {
 	let query = 'DELETE FROM users WHERE userID IN ';
 	query += '(SELECT userID FROM roleUserLink ';
@@ -153,6 +163,7 @@ const removeUsersUsingRestID = function (restaurantID, done) {
 	});
 };
 
+// Checks if the username already exists in the system
 const checkUsername = function (username, done) {
 	const values = [[username]];
 
@@ -169,6 +180,7 @@ const checkUsername = function (username, done) {
 	);
 };
 
+// Gets one user using userID
 const getOneUser = function (userID, done) {
 	const values = [[userID]];
 
@@ -185,6 +197,7 @@ const getOneUser = function (userID, done) {
 	);
 };
 
+// Removes a user from the database using the userID
 const removeUser = (userID, done) => {
 	const values = [userID];
 
@@ -201,6 +214,7 @@ const removeUser = (userID, done) => {
 	);
 };
 
+// Clears the authToken from the database
 const clearAuthToken = (authToken, done) => {
 	getIdFromToken(authToken, function (error, userID) {
 		if (error || !userID) {
@@ -221,6 +235,7 @@ const clearAuthToken = (authToken, done) => {
 	});
 };
 
+// Exports all the functions that are needed in other files
 module.exports = {
 	addUser: addUser,
 	getIdFromToken: getIdFromToken,

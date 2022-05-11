@@ -1,6 +1,7 @@
 const restaurants = require('../controllers/restaurant.controllers');
 const auth = require('../scripts/authenticator');
 
+//Creates the routes that can be used to access the API
 module.exports = function (app) {
 	app
 		.route('/restaurant')

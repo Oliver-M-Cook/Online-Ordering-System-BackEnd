@@ -2,6 +2,7 @@ const db = require('../../config/db');
 const users = require('../models/user.models');
 const restaurants = require('../models/restaurant.models');
 
+// Creates an order using orderData sent from controller
 const create = (orderData, authToken, done) => {
 	users.getIdFromToken(authToken, function (error, userID) {
 		if (error) {
@@ -32,8 +33,10 @@ const create = (orderData, authToken, done) => {
 	});
 };
 
+// Gets an array of table numbers that have orders linked to them
 const getTablesWithOrders = (restaurantID, done) => {
 	db.getPool().query(
+		// Distinct keyword removes duplicate entries of the same table number
 		'SELECT DiSTINCT tableNumber FROM orders WHERE restaurantID = ?',
 		restaurantID,
 		function (error, result) {
@@ -46,8 +49,10 @@ const getTablesWithOrders = (restaurantID, done) => {
 	);
 };
 
+// Gets the orders for a specified restaurant
 const getOrders = (restaurantID, roleID, authToken, done) => {
 	const orders = [];
+	// Checks if the user works at the restaurant
 	restaurants.checkStaff(
 		roleID,
 		restaurantID,
@@ -60,6 +65,7 @@ const getOrders = (restaurantID, roleID, authToken, done) => {
 					if (error || result.length < 1) {
 						return done(error);
 					} else {
+						// Formats the tables so each table gets the right order in JSON format
 						for (let i = 0; i < result.length; i++) {
 							tableOrder = {};
 							tableOrder.tableNumber = result[i].tableNumber;
@@ -75,16 +81,18 @@ const getOrders = (restaurantID, roleID, authToken, done) => {
 							if (error || result.length < 1) {
 								return done(error);
 							} else {
-								console.log(result);
+								// loops through results and tables to filter the orders for each table
 								for (let i = 0; i < result.length; i++) {
 									for (let j = 0; j < orders.length; j++) {
 										if (orders[j].tableNumber === result[i].tableNumber) {
+											// Creates a temporary JSON object that holds the order information
 											const tempOrder = {
 												orderID: result[i].orderID,
 												itemName: result[i].itemName,
 												quantity: result[i].quantity,
 											};
 
+											// Adds the order to the correct table order array
 											orders[j].orders.push(tempOrder);
 										}
 									}
@@ -99,6 +107,7 @@ const getOrders = (restaurantID, roleID, authToken, done) => {
 	);
 };
 
+// Deletes the orders using the table number
 const deleteOrderUsingTable = (
 	restauarantID,
 	roleID,
@@ -131,6 +140,7 @@ const deleteOrderUsingTable = (
 	);
 };
 
+// Exports the functions so they can be used outside of this file
 module.exports = {
 	create: create,
 	getOrders: getOrders,

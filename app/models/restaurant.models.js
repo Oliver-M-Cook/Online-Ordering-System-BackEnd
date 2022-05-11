@@ -1,9 +1,11 @@
 const db = require('../../config/db');
 const users = require('../models/user.models');
 
+// Creates a new restaurant using the data passed through
 const addRestaurant = (data, done) => {
 	const values = [[data.restaurantName]];
 
+	// Checks if the username is unique
 	users.checkUsername(data.username, function (error, exists) {
 		if (error || exists) {
 			if (exists) {
@@ -19,6 +21,7 @@ const addRestaurant = (data, done) => {
 					if (error) {
 						return done(error);
 					} else {
+						// The role is hardcoded because this will always be manager
 						data.roleID = 4;
 						data.restaurantID = results.insertId;
 						users.linkRole(data, function (error, id) {
@@ -35,13 +38,16 @@ const addRestaurant = (data, done) => {
 	});
 };
 
+// Deletes the restaurant from the database using the restaurantID
 const removeRestaurant = (restaurantID, done) => {
 	const values = [[restaurantID]];
 
+	// Removes the staff that are linked to the restaurant
 	users.removeUsersUsingRestID(restaurantID, function (error) {
 		if (error) {
 			return done(error);
 		} else {
+			// Deletes the restaurant from the database
 			db.getPool().query(
 				'DELETE FROM restaurants WHERE restaurantID = ?',
 				values,
@@ -57,6 +63,7 @@ const removeRestaurant = (restaurantID, done) => {
 	});
 };
 
+// Gets all the restaurants from the database
 const getRestaurants = (done) => {
 	let query = 'SELECT r.restaurantID, restaurantName, userID AS managerID ';
 	query += 'FROM restaurants r ';
@@ -73,9 +80,11 @@ const getRestaurants = (done) => {
 	});
 };
 
+// Gets a singular restaurant using the restaurantID
 const getOneRestaurant = (restaurantID, done) => {
 	const values = [[restaurantID]];
 
+	// Query is setup here because it is quite long
 	let query = 'SELECT r.restaurantID, restaurantName, userID ';
 	query += 'FROM restaurants r ';
 	query += 'INNER JOIN roleUserLink rul ON r.restaurantID = rul.restaurantID ';
@@ -86,6 +95,7 @@ const getOneRestaurant = (restaurantID, done) => {
 			return done(error, null);
 		} else {
 			const data = results[0];
+			// Gets the user data from the ID that is linked to the restaurant
 			users.getOneUser(data.userID, function (error, result) {
 				if (error) {
 					return done(error, null);
@@ -101,6 +111,7 @@ const getOneRestaurant = (restaurantID, done) => {
 	});
 };
 
+// Updates a restaurant given the data that is passed through
 const updateRestaurant = (data, done) => {
 	const values = [data.restaurantName, data.restaurantID];
 
@@ -118,6 +129,7 @@ const updateRestaurant = (data, done) => {
 	);
 };
 
+// Checks if the user logged in is the manager of the restaurant
 const checkManager = (restaurantID, authToken, done) => {
 	users.getIdFromToken(authToken, function (error, userID) {
 		if (error) {
@@ -138,6 +150,7 @@ const checkManager = (restaurantID, authToken, done) => {
 	});
 };
 
+// Checks if the user that is logged in works at the restaurant
 const checkStaff = (roleID, restaurantID, authToken, done) => {
 	users.getIdFromToken(authToken, function (error, userID) {
 		if (error) {
@@ -160,6 +173,7 @@ const checkStaff = (roleID, restaurantID, authToken, done) => {
 	});
 };
 
+// Adds staff member to database
 const addStaff = (authToken, user, done) => {
 	checkManager(user.restaurantID, authToken, function (error, manager) {
 		if (error) {
@@ -180,6 +194,7 @@ const addStaff = (authToken, user, done) => {
 	});
 };
 
+// Gets staff with a certain role that is passed through
 const getStaff = (restaurantID, roleID, authToken, done) => {
 	checkManager(restaurantID, authToken, function (error, manager) {
 		if (error) {
@@ -207,6 +222,7 @@ const getStaff = (restaurantID, roleID, authToken, done) => {
 	});
 };
 
+// Gets individual staff member using userID
 const getOneStaff = (restaurantID, userID, authToken, roleID, done) => {
 	checkManager(restaurantID, authToken, function (error, manager) {
 		if (error) {
@@ -233,6 +249,7 @@ const getOneStaff = (restaurantID, userID, authToken, roleID, done) => {
 	});
 };
 
+// Remove a staff member using the data that is passed through
 const removeStaff = (restaurantID, userID, roleID, authToken, done) => {
 	checkManager(restaurantID, authToken, function (error, manager) {
 		if (error) {
@@ -241,6 +258,7 @@ const removeStaff = (restaurantID, userID, roleID, authToken, done) => {
 			if (!manager) {
 				return done('Not manager of restaurant');
 			} else {
+				// Get one staff is used to make sure the userID passed through is a staff member
 				getOneStaff(
 					restaurantID,
 					userID,
@@ -265,6 +283,7 @@ const removeStaff = (restaurantID, userID, roleID, authToken, done) => {
 	});
 };
 
+// Exports the functions to be used outside the file
 module.exports = {
 	addRestaurant: addRestaurant,
 	removeRestaurant: removeRestaurant,

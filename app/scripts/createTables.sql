@@ -1,5 +1,5 @@
 USE cookoliv;
-
+-- Drops tables if they exist
 DROP TABLE IF EXISTS roleUserLink;
 DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS orders;
@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS items;
 DROP TABLE IF EXISTS restaurants;
 
+-- Creates the tables with the required columns
 CREATE TABLE users (
   userID int(10) NOT NULL AUTO_INCREMENT,
   username varchar(15) NOT NULL,
@@ -63,11 +64,13 @@ CREATE TABLE orders (
   CONSTRAINT fkOrderItemID FOREIGN KEY (itemID) REFERENCES items (itemID) ON DELETE CASCADE
 );
 
+-- Inserts the roles that will be used by the server
 INSERT INTO roles (role) VALUES ("Customer");
 INSERT INTO roles (role) VALUES ("Waiter");
 INSERT INTO roles (role) VALUES ("Kitchen");
 INSERT INTO roles (role) VALUES ("Manager");
 INSERT INTO roles (role) VALUES ("Admin");
 
+-- Inserts the admin user
 INSERT INTO users (username, password, firstName, lastName) VALUES ("admin", "5f4dcc3b5aa765d61d8327deb882cf99", "Oliver", "Cook");
 INSERT INTO roleUserLink (userID, roleID) VALUES (1, 5)

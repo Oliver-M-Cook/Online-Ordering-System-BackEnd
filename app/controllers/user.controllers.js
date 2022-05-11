@@ -1,10 +1,11 @@
-const { clearAuthToken } = require('../models/user.models');
 const users = require('../models/user.models');
 
+// Handles creatng new users
 const create = (roleID, restaurantID) => {
 	return function (req, res) {
 		const user = req.body;
 		user.roleID = roleID;
+		// RestaurantID can be null because customers are not bound by a restaurant
 		user.restaurantID = restaurantID;
 		users.linkRole(user, function (error, id) {
 			if (error) {
@@ -17,6 +18,7 @@ const create = (roleID, restaurantID) => {
 	};
 };
 
+// Handles logging the user into their account
 const login = (req, res) => {
 	const username = req.body.username;
 	const password = req.body.password;
@@ -26,6 +28,7 @@ const login = (req, res) => {
 			if (error) {
 				res.status(400).send(error);
 			} else {
+				// Handles the authToken generation
 				users.getAuthToken(id, function (error, authToken) {
 					if (authToken) {
 						users.getRoleFromToken(authToken, function (error, result) {
@@ -62,10 +65,11 @@ const login = (req, res) => {
 	}
 };
 
+// Handles logging out the user
 const logout = (req, res) => {
 	const authToken = req.get('X-Authorization');
 
-	clearAuthToken(authToken, function (error) {
+	users.clearAuthToken(authToken, function (error) {
 		if (error) {
 			res.status(500).send(error);
 		} else {
@@ -74,6 +78,7 @@ const logout = (req, res) => {
 	});
 };
 
+// Exports functions so they can called outside this file
 module.exports = {
 	create: create,
 	login: login,

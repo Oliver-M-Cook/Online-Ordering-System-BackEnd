@@ -1,12 +1,15 @@
 const items = require('../models/item.models');
 
+// Handles the create item requesrt
 const create = (req, res) => {
 	const itemData = req.body;
 	itemData.restaurantID = req.params.restID;
+	// Gets the authToken from the request headers
 	const authToken = req.get('X-Authorization');
 
 	let validationPass = true;
 
+	// Simple validation to make sure there are no blank fields
 	if (
 		itemData.itemName &&
 		itemData.price &&
@@ -25,6 +28,7 @@ const create = (req, res) => {
 	}
 };
 
+// Handles getting the items from a restaurant
 const getItems = (req, res) => {
 	const restaurantID = req.params.restID;
 
@@ -37,7 +41,9 @@ const getItems = (req, res) => {
 	});
 };
 
+// Handles getting a single item from the database
 const getOneItem = (req, res) => {
+	// Gets the parameters from the request
 	const restaurantID = req.params.restID;
 	const itemID = req.params.itemID;
 
@@ -50,12 +56,15 @@ const getOneItem = (req, res) => {
 	});
 };
 
+// Handles updating an item
 const updateItem = (req, res) => {
+	// Collects all the data neccessary to update an item
 	const itemData = req.body;
 	itemData.restaurantID = req.params.restID;
 	itemData.itemID = req.params.itemID;
 	const authToken = req.get('X-Authorization');
 
+	// Checks if any fields are blank
 	if (
 		itemData.itemName &&
 		itemData.price &&
@@ -75,6 +84,7 @@ const updateItem = (req, res) => {
 	}
 };
 
+// Handles deleting items from the database
 const deleteItem = (req, res) => {
 	const restaurantID = req.params.restID;
 	const itemID = req.params.itemID;
@@ -89,6 +99,7 @@ const deleteItem = (req, res) => {
 	});
 };
 
+// Exports the functions so they can be used outside of the file
 module.exports = {
 	create: create,
 	getItems: getItems,

@@ -1,3 +1,4 @@
+// Sets up the values needed to establish connection to database
 const config = {
 	db: {
 		host: process.env.HOST,

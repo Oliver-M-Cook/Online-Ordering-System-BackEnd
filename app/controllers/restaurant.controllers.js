@@ -1,6 +1,6 @@
-const { response } = require('express');
 const restaurants = require('../models/restaurant.models');
 
+// Handles creating new restaurants
 const create = (req, res) => {
 	const data = req.body;
 
@@ -23,6 +23,7 @@ const create = (req, res) => {
 	}
 };
 
+// Handles removing restaurant from database
 const remove = (req, res) => {
 	const restaurantID = req.params.restID;
 
@@ -35,6 +36,7 @@ const remove = (req, res) => {
 	});
 };
 
+// Handles getting restaurants and sending them in response
 const getRestaurants = (req, res) => {
 	restaurants.getRestaurants(function (error, results) {
 		if (error) {
@@ -45,6 +47,7 @@ const getRestaurants = (req, res) => {
 	});
 };
 
+// Handles getting a singular restaurant
 const getOneRestaurant = (req, res) => {
 	const restaurantID = req.params.restID;
 
@@ -57,6 +60,7 @@ const getOneRestaurant = (req, res) => {
 	});
 };
 
+// Handles updating restaurant
 const updateRestaurant = (req, res) => {
 	const restaurantID = req.params.restID;
 
@@ -76,8 +80,10 @@ const updateRestaurant = (req, res) => {
 	}
 };
 
+// Handles adding new staff members
 const addStaff = (roleID) => {
 	return function (req, res) {
+		// Collects all the data that is needed
 		const restaurantID = req.params.restID;
 		const authToken = req.get('X-Authorization');
 		const userData = req.body;
@@ -103,19 +109,7 @@ const addStaff = (roleID) => {
 	};
 };
 
-const getWaiters = (req, res) => {
-	const restaurantID = req.params.restID;
-	const authToken = req.get('X-Authorization');
-
-	restaurants.getWaiters(restaurantID, authToken, function (error, results) {
-		if (error || !results) {
-			res.status(500).send(error);
-		} else {
-			res.status(200).send(results);
-		}
-	});
-};
-
+// Handles getting staff from the database
 const getStaff = (roleID) => {
 	return function (req, res) {
 		const restaurantID = req.params.restID;
@@ -136,6 +130,7 @@ const getStaff = (roleID) => {
 	};
 };
 
+// Handles getting one staff member
 const getOneStaff = (roleID) => {
 	return function (req, res) {
 		const restaurantID = req.params.restID;
@@ -158,6 +153,7 @@ const getOneStaff = (roleID) => {
 	};
 };
 
+// Handles removing staff member
 const removeStaff = (roleID) => {
 	return function (req, res) {
 		const restaurantID = req.params.restID;
@@ -180,6 +176,7 @@ const removeStaff = (roleID) => {
 	};
 };
 
+// Exports functions so they can be used outside this file
 module.exports = {
 	create: create,
 	remove: remove,
