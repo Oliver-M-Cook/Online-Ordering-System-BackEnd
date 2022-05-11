@@ -1,0 +1,5 @@
+19041856 Product Backend
+You will need NodeJS installed
+run npm init in the directory to install required libraries
+once initialised, run npm start in terminal to start server.
+Server uses port 3000 so this port needs to be free
