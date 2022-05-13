@@ -3,3 +3,4 @@ You will need NodeJS installed
 run npm install in the directory to install required libraries
 once installed, run npm start in terminal to start server.
 Server uses port 3000 so this port needs to be free
+Node version that was used for development: v16.13.2
